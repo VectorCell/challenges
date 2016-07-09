@@ -1,5 +1,6 @@
 *.d
 *.o
+main
 *.class
 *.pyc
 __pycache__

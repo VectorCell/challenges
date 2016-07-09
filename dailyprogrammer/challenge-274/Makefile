@@ -21,13 +21,13 @@ main : main.o
 	$(CXX) $(CPPFLAGS) -o main main.o $(LIBFLAGS)
 
 %.o : %.cc
-	$(CXX) $(CPPFLAGS) -MD -c $*.cc
+	$(CXX) $(CPPFLAGS) -MD -c $*.cc $(LIBFLAGS)
 
 test : all
 	tail -n +2 < main.in | ./clean.py
-	./main < main.in | ./clean.py
+	timeout -k 5 2 ./main < main.in | ./clean.py
 	tail -n +2 < large.in | ./clean.py
-	./main < large.in | ./clean.py
+	timeout -k 5 2 ./main < large.in | ./clean.py
 
 clean :
 	rm -f *.d

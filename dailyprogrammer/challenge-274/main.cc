@@ -8,6 +8,9 @@
 using namespace std;
 
 
+uint64_t permutations = 0;
+
+
 // row-major order
 typedef uint32_t elem_type;
 typedef vector<elem_type> row_type;
@@ -59,8 +62,13 @@ bool permute (grid_type& grid, unsigned int row, unsigned int col)
 {
 	if (row == grid.size()) {
 
+		++permutations;
+
 		if (is_closed(grid)) {
 			return true;
+		} else {
+			//printf("not closed:\n");
+			//print_grid(grid);
 		}
 
 	} else {
@@ -75,6 +83,9 @@ bool permute (grid_type& grid, unsigned int row, unsigned int col)
 		// no rotations
 		if (permute(grid, next_row, next_col))
 			return true;
+
+		if (grid[row][col] == 0 || grid[row][col] == 0xf)
+			return false;
 
 		// one rotation
 		rotate(grid[row][col]);
@@ -95,8 +106,30 @@ bool permute (grid_type& grid, unsigned int row, unsigned int col)
 	return false;
 }
 
+bool solve_parallel (grid_type& grid)
+{
+	grid_type copies[4];
+	bool ans[4];
+	for (int k = 0; k < 4; ++k) {
+		copies[k] = grid;
+		ans[k] = false;
+	}
+
+	#pragma omp parallel for
+	for (int k = 0; k < 4; ++k) {
+		ans[k] = permute(copies[k], 0, 1);
+	}
+
+	for (int k = 0; k < 4; ++k) {
+		if (ans[k])
+			return true;
+	}
+	return false;
+}
+
 bool solve (grid_type& grid)
 {
+	//return solve_parallel(grid);
 	return permute(grid, 0, 0);
 }
 
@@ -115,5 +148,6 @@ int main (int argc, char *argv[])
 	if (solve(grid)) {
 		print_grid(grid);
 	}
+	cout << "This took " << permutations << " permutations." << endl;
 	return 0;
 }
